@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"database/sql"
 	"fmt"
 	"io"
@@ -24,9 +23,8 @@ func user() http.Handler {
 			log.Fatal(err)
 		}
 
-		n := bytes.Compare(body, []byte(""))
-		if n != 0 {
-			body = body[0 : len(body)-1]
+		if len(body) != 0 {
+			body = body[:len(body)-1]
 			fmt.Printf("client says: %s\n", body)
 
 			switch string(body) {
