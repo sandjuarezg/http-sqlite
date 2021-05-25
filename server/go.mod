@@ -1,4 +1,4 @@
-module github.com/sandjuarezg/http-sqlite
+module github.com/sandjuarezg/http-sqlite/server
 
 go 1.16
 

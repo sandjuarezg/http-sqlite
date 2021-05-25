@@ -11,43 +11,34 @@ import (
 	"os"
 )
 
-const url = "http://localhost:8080/user"
-
 var client = &http.Client{}
 
 func main() {
-	var reply = make([]byte, 1024)
-	var rStdin = bufio.NewReader(os.Stdin)
-
 	for {
-		//Show menu to server
-		var response, body = createNewRequest(url, nil)
-		defer response.Body.Close()
-		fmt.Printf("%s", body)
+		var reply = make([]byte, 1024)
+		var rStdin = bufio.NewReader(os.Stdin)
 
-		//Read option
-		n, err := rStdin.Read(reply)
+		fmt.Println("1. Add user")
+		fmt.Println("2. Show users")
+		fmt.Println("3. Exit")
+		var n, err = rStdin.Read(reply)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		//Send option
-		response, body = createNewRequest(url, bytes.NewReader(reply[0:n]))
-		defer response.Body.Close()
+		reply = reply[:n]
+		switch string(reply) {
+		case "1\n":
+			reply = make([]byte, 1024)
 
-		body = body[:len(body)-1]
-		body = body[bytes.LastIndex(body, []byte("\n"))+1:]
-
-		switch string(body) {
-		case "/add":
 			var data []byte
 			fmt.Println("Enter a name")
 			n, err = rStdin.Read(reply)
 			if err != nil {
 				log.Fatal(err)
 			}
-
 			data = append(data, reply[:n]...)
+
 			fmt.Println("Enter a password")
 			n, err = rStdin.Read(reply)
 			if err != nil {
@@ -55,17 +46,20 @@ func main() {
 			}
 			data = append(data, reply[:n]...)
 
-			var response, body = createNewRequest(url+string(body), bytes.NewReader(data))
+			var response, body = createNewRequest("http://localhost:8080/user/add", bytes.NewReader(data))
 			defer response.Body.Close()
-			fmt.Printf("%s", body)
-		case "/show":
-			var response, body = createNewRequest(url+string(body), nil)
+			fmt.Printf("%s\n", body)
+		case "2\n":
+			var response, body = createNewRequest("http://localhost:8080/user/show", nil)
 			defer response.Body.Close()
-			fmt.Printf("%s", body)
+			fmt.Printf("%s\n", body)
+		case "3\n":
+			fmt.Println("E X I T I N G . . .")
+			os.Exit(0)
 		default:
-			var response, body = createNewRequest(url+string(body), nil)
+			var response, body = createNewRequest("http://localhost:8080/user/default", nil)
 			defer response.Body.Close()
-			fmt.Printf("%s", body)
+			fmt.Printf("%s\n", body)
 		}
 	}
 }
