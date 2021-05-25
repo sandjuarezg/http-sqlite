@@ -10,7 +10,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/sandjuarezg/http-sqlite/server/database/function"
-	"github.com/sandjuarezg/http-sqlite/server/database/model"
+	"github.com/sandjuarezg/http-sqlite/server/database/user"
 )
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, *sql.DB)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var db, err = sql.Open("sqlite3", "./database/user.db")
+		db, err := sql.Open("sqlite3", "./database/user.db")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -40,12 +40,12 @@ func postAdd(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	defer db.Close()
 
 	if r.Method == "POST" {
-		var body, err = ioutil.ReadAll(r.Body)
+		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err = model.AddUser(db, body)
+		err = user.AddUser(db, body)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -59,7 +59,7 @@ func getShow(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	defer db.Close()
 
 	if r.Method == "GET" {
-		var text, err = model.ShowUser(db)
+		text, err := user.ShowUser(db)
 		if err != nil {
 			log.Fatal(err)
 		}

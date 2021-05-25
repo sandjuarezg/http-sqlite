@@ -11,17 +11,17 @@ import (
 	"os"
 )
 
-var client = &http.Client{}
+var client *http.Client = &http.Client{}
 
 func main() {
 	for {
-		var reply = make([]byte, 1024)
-		var rStdin = bufio.NewReader(os.Stdin)
+		var reply []byte = make([]byte, 1024)
+		var rStdin *bufio.Reader = bufio.NewReader(os.Stdin)
 
 		fmt.Println("1. Add user")
 		fmt.Println("2. Show users")
 		fmt.Println("3. Exit")
-		var n, err = rStdin.Read(reply)
+		n, err := rStdin.Read(reply)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -31,7 +31,6 @@ func main() {
 		case "1\n":
 
 			reply = make([]byte, 1024)
-
 			var data []byte
 			fmt.Println("Enter a name")
 			n, err = rStdin.Read(reply)
@@ -47,13 +46,13 @@ func main() {
 			}
 			data = append(data, reply[:n]...)
 
-			var response, body = createNewRequest("POST", "http://localhost:8080/user/add", bytes.NewReader(data))
+			response, body := createNewRequest("POST", "http://localhost:8080/user/add", bytes.NewReader(data))
 			defer response.Body.Close()
 			fmt.Printf("%s\n", body)
 
 		case "2\n":
 
-			var response, body = createNewRequest("GET", "http://localhost:8080/user/show", nil)
+			response, body := createNewRequest("GET", "http://localhost:8080/user/show", nil)
 			defer response.Body.Close()
 			fmt.Printf("%s\n", body)
 
@@ -64,7 +63,7 @@ func main() {
 
 		default:
 
-			var response, body = createNewRequest("GET", "http://localhost:8080/user/default", nil)
+			response, body := createNewRequest("GET", "http://localhost:8080/user/default", nil)
 			defer response.Body.Close()
 			fmt.Printf("%s\n", body)
 
@@ -73,7 +72,7 @@ func main() {
 }
 
 func createNewRequest(method string, url string, content io.Reader) (response *http.Response, body []byte) {
-	var request, err = http.NewRequest(method, url, content)
+	request, err := http.NewRequest(method, url, content)
 	if err != nil {
 		log.Fatal(err)
 	}

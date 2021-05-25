@@ -1,4 +1,4 @@
-package model
+package user
 
 import (
 	"bytes"
@@ -8,6 +8,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type user struct {
+	id   int
+	name string
+	pass string
+}
+
 func AddUser(db *sql.DB, body []byte) (err error) {
 	smt, err := db.Prepare("INSERT INTO users (name, password) VALUES (?, ?)")
 	if err != nil {
@@ -15,11 +21,17 @@ func AddUser(db *sql.DB, body []byte) (err error) {
 	}
 	defer smt.Close()
 
-	var element = bytes.Split(body, []byte("\n"))
+	var element [][]byte = bytes.Split(body, []byte{'\n'})
 
-	_, err = smt.Exec(element[0], element[1])
-	if err != nil {
-		return
+	if len(element) == 3 {
+		var user = user{}
+		user.name = string(element[0])
+		user.pass = string(element[1])
+
+		_, err = smt.Exec(user.name, user.pass)
+		if err != nil {
+			return
+		}
 	}
 
 	return
@@ -32,16 +44,16 @@ func ShowUser(db *sql.DB) (text string, err error) {
 	}
 	defer rows.Close()
 
-	var element [3]string
+	var user = user{}
 
 	text = fmt.Sprintf("|%-7s|%-15s|%-15s|\n", "id", "Name", "Password")
 	text += fmt.Sprintln("_________________________________________")
 	for rows.Next() {
-		err = rows.Scan(&element[0], &element[1], &element[2])
+		err = rows.Scan(&user.id, &user.name, &user.pass)
 		if err != nil {
 			return
 		}
-		text += fmt.Sprintf("|%-7s|%-15s|%-15s|\n", element[0], element[1], element[2])
+		text += fmt.Sprintf("|%-7d|%-15s|%-15s|\n", user.id, user.name, user.pass)
 	}
 
 	return
