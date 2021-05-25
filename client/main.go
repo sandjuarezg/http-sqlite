@@ -29,6 +29,7 @@ func main() {
 		reply = reply[:n]
 		switch string(reply) {
 		case "1\n":
+
 			reply = make([]byte, 1024)
 
 			var data []byte
@@ -46,26 +47,33 @@ func main() {
 			}
 			data = append(data, reply[:n]...)
 
-			var response, body = createNewRequest("http://localhost:8080/user/add", bytes.NewReader(data))
+			var response, body = createNewRequest("POST", "http://localhost:8080/user/add", bytes.NewReader(data))
 			defer response.Body.Close()
 			fmt.Printf("%s\n", body)
+
 		case "2\n":
-			var response, body = createNewRequest("http://localhost:8080/user/show", nil)
+
+			var response, body = createNewRequest("GET", "http://localhost:8080/user/show", nil)
 			defer response.Body.Close()
 			fmt.Printf("%s\n", body)
+
 		case "3\n":
+
 			fmt.Println("E X I T I N G . . .")
 			os.Exit(0)
+
 		default:
-			var response, body = createNewRequest("http://localhost:8080/user/default", nil)
+
+			var response, body = createNewRequest("GET", "http://localhost:8080/user/default", nil)
 			defer response.Body.Close()
 			fmt.Printf("%s\n", body)
+
 		}
 	}
 }
 
-func createNewRequest(url string, content io.Reader) (response *http.Response, body []byte) {
-	var request, err = http.NewRequest("POST", url, content)
+func createNewRequest(method string, url string, content io.Reader) (response *http.Response, body []byte) {
+	var request, err = http.NewRequest(method, url, content)
 	if err != nil {
 		log.Fatal(err)
 	}

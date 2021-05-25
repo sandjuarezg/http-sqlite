@@ -15,25 +15,31 @@ import (
 
 func main() {
 	function.SqlMigration()
-	var db, err = sql.Open("sqlite3", "./database/user.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
 
-	var mux = http.NewServeMux()
-
-	mux.Handle("/user/add", add(db))
-	mux.Handle("/user/show", show(db))
-	mux.Handle("/user/default", http.NotFoundHandler())
+	http.HandleFunc("/user/add", makeHandler(postAdd))
+	http.HandleFunc("/user/show", makeHandler(getShow))
+	http.HandleFunc("/user/default", http.NotFound)
 
 	fmt.Println("Listening on localhost:8080")
 
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func add(db *sql.DB) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func makeHandler(fn func(http.ResponseWriter, *http.Request, *sql.DB)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var db, err = sql.Open("sqlite3", "./database/user.db")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fn(w, r, db)
+	}
+}
+
+func postAdd(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	defer db.Close()
+
+	if r.Method == "POST" {
 		var body, err = ioutil.ReadAll(r.Body)
 		if err != nil {
 			log.Fatal(err)
@@ -44,17 +50,20 @@ func add(db *sql.DB) http.Handler {
 			log.Fatal(err)
 		}
 
-		io.WriteString(w, "Data saved successfully\n")
-	})
+		io.WriteString(w, "Insert data successfully\n")
+
+	}
 }
 
-func show(db *sql.DB) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func getShow(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	defer db.Close()
+
+	if r.Method == "GET" {
 		var text, err = model.ShowUser(db)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		io.WriteString(w, text)
-	})
+	}
 }
