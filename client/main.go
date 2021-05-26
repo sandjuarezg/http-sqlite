@@ -47,12 +47,20 @@ func main() {
 			data = append(data, reply[:n]...)
 
 			response, body := createNewRequest("POST", "http://localhost:8080/user/add", bytes.NewReader(data))
+			var status int = response.StatusCode
+			if status != 200 {
+				log.Fatal(response.Status)
+			}
 			defer response.Body.Close()
 			fmt.Printf("%s\n", body)
 
 		case "2\n":
 
 			response, body := createNewRequest("GET", "http://localhost:8080/user/show", nil)
+			var status int = response.StatusCode
+			if status != 200 {
+				log.Fatal(response.Status)
+			}
 			defer response.Body.Close()
 			fmt.Printf("%s\n", body)
 

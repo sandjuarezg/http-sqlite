@@ -24,7 +24,7 @@ func AddUser(db *sql.DB, body []byte) (err error) {
 	var element [][]byte = bytes.Split(body, []byte{'\n'})
 
 	if len(element) == 3 {
-		var user = user{}
+		var user user = user{}
 		user.name = string(element[0])
 		user.pass = string(element[1])
 
@@ -44,7 +44,7 @@ func ShowUser(db *sql.DB) (text string, err error) {
 	}
 	defer rows.Close()
 
-	var user = user{}
+	var user user = user{}
 
 	text = fmt.Sprintf("|%-7s|%-15s|%-15s|\n", "id", "Name", "Password")
 	text += fmt.Sprintln("_________________________________________")
