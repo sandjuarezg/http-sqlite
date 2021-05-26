@@ -13,11 +13,20 @@ import (
 	"github.com/sandjuarezg/http-sqlite/server/database/user"
 )
 
+var db *sql.DB
+var err error
+
 func main() {
 	function.SqlMigration()
 
-	http.HandleFunc("/user/add", makeHandler(postAdd))
-	http.HandleFunc("/user/show", makeHandler(getShow))
+	db, err = sql.Open("sqlite3", "./database/user.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	http.HandleFunc("/user/add", postAdd)
+	http.HandleFunc("/user/show", getShow)
 	http.HandleFunc("/user/default", http.NotFound)
 
 	fmt.Println("Listening on localhost:8080")
@@ -25,20 +34,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func makeHandler(fn func(http.ResponseWriter, *http.Request, *sql.DB)) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		db, err := sql.Open("sqlite3", "./database/user.db")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fn(w, r, db)
-	}
-}
-
-func postAdd(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	defer db.Close()
-
+func postAdd(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -55,9 +51,7 @@ func postAdd(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 }
 
-func getShow(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	defer db.Close()
-
+func getShow(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		text, err := user.ShowUser(db)
 		if err != nil {
