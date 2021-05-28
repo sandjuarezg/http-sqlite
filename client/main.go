@@ -70,9 +70,7 @@ func main() {
 
 		default:
 
-			response, body := createNewRequest("GET", "http://localhost:8080/user/default", nil)
-			defer response.Body.Close()
-			fmt.Printf("%s\n", body)
+			fmt.Println("404 page not found")
 
 		}
 	}

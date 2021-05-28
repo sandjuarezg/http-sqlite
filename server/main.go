@@ -31,7 +31,6 @@ func main() {
 
 	http.HandleFunc("/user/add", postAdd)
 	http.HandleFunc("/user/show", getShow)
-	http.HandleFunc("/user/default", http.NotFound)
 
 	fmt.Println("Listening on localhost:8080")
 
@@ -41,16 +40,19 @@ func main() {
 func postAdd(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	err = user.AddUser(db, body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	io.WriteString(w, "Insert data successfully\n")
@@ -59,11 +61,13 @@ func postAdd(w http.ResponseWriter, r *http.Request) {
 func getShow(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	text, err := user.ShowUser(db)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	io.WriteString(w, text)
