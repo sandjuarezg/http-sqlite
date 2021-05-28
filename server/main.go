@@ -1,3 +1,7 @@
+//Note to self: WriteHeader must be in before writing to ResponseWriter
+//When writing, it gets status 200
+//if WriteHeader is called afterwards, generates a superfluous response
+
 package main
 
 import (
@@ -35,29 +39,32 @@ func main() {
 }
 
 func postAdd(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = user.AddUser(db, body)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		io.WriteString(w, "Insert data successfully\n")
-
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusInternalServerError)
 	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	err = user.AddUser(db, body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	io.WriteString(w, "Insert data successfully\n")
 }
 
 func getShow(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		text, err := user.ShowUser(db)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		io.WriteString(w, text)
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusInternalServerError)
 	}
+
+	text, err := user.ShowUser(db)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	io.WriteString(w, text)
 }

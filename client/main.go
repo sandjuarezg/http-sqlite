@@ -21,19 +21,18 @@ func main() {
 		fmt.Println("1. Add user")
 		fmt.Println("2. Show users")
 		fmt.Println("3. Exit")
-		n, err := rStdin.Read(reply)
+		reply, _, err := rStdin.ReadLine()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		reply = reply[:n]
 		switch string(reply) {
-		case "1\n":
+		case "1":
 
 			reply = make([]byte, 1024)
 			var data []byte
 			fmt.Println("Enter a name")
-			n, err = rStdin.Read(reply)
+			n, err := rStdin.Read(reply)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -54,7 +53,7 @@ func main() {
 			defer response.Body.Close()
 			fmt.Printf("%s\n", body)
 
-		case "2\n":
+		case "2":
 
 			response, body := createNewRequest("GET", "http://localhost:8080/user/show", nil)
 			var status int = response.StatusCode
@@ -64,7 +63,7 @@ func main() {
 			defer response.Body.Close()
 			fmt.Printf("%s\n", body)
 
-		case "3\n":
+		case "3":
 
 			fmt.Println("E X I T I N G . . .")
 			os.Exit(0)
